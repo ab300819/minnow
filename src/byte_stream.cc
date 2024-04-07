@@ -4,74 +4,86 @@
 
 using namespace std;
 
-ByteStream::ByteStream( uint64_t capacity ) : capacity_( capacity ) {}
+ByteStream::ByteStream( uint64_t capacity )
+  : capacity_( capacity )
+  , buffer_()
+  , is_close_( false )
+  , has_error_( false )
+  , bytes_pushed_( 0 )
+  , bytes_popped_( 0 )
+{}
 
 void Writer::push( string data )
 {
-  // Your code here.
+  for ( auto c : data ) {
+    if ( available_capacity() > 0 ) {
+      this->buffer_.push( c );
+      this->bytes_pushed_++;
+    }
+  }
   (void)data;
 }
 
 void Writer::close()
 {
-  // Your code here.
+  this->is_close_ = true;
 }
 
 void Writer::set_error()
 {
-  // Your code here.
+  this->has_error_ = true;
 }
 
 bool Writer::is_closed() const
 {
-  // Your code here.
-  return {};
+  return this->is_close_;
 }
 
 uint64_t Writer::available_capacity() const
 {
-  // Your code here.
-  return {};
+  auto current_size = buffer_.size();
+  return current_size < capacity_ ? capacity_ - current_size : 0;
 }
 
 uint64_t Writer::bytes_pushed() const
 {
-  // Your code here.
-  return {};
+  return this->bytes_pushed_;
 }
 
 string_view Reader::peek() const
 {
-  // Your code here.
-  return {};
+  if ( buffer_.empty() ) {
+    return {};
+  }
+
+  return { &buffer_.front(), 1 };
 }
 
 bool Reader::is_finished() const
 {
-  // Your code here.
-  return {};
+  return this->is_close_ && this->buffer_.empty();
 }
 
 bool Reader::has_error() const
 {
-  // Your code here.
-  return {};
+  return this->has_error_;
 }
 
 void Reader::pop( uint64_t len )
 {
-  // Your code here.
+  for ( uint64_t i = 0; i < len; i++ ) {
+    buffer_.pop();
+    this->bytes_popped_++;
+  }
   (void)len;
 }
 
 uint64_t Reader::bytes_buffered() const
 {
-  // Your code here.
-  return {};
+  return buffer_.size();
 }
 
 uint64_t Reader::bytes_popped() const
 {
-  // Your code here.
-  return {};
+  return this->bytes_popped_;
 }
