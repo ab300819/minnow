@@ -2,10 +2,22 @@
 
 #include "byte_stream.hh"
 
+#include <map>
 #include <string>
 
 class Reassembler
 {
+
+private:
+  uint64_t _next_index { 0 };
+  uint64_t _pre_index { 0 };
+  bool wait_to_close { false };
+  std::map<uint64_t, std::string> _buffer {};
+
+  void write_to_buffer( uint64_t index, std::string data, Writer& output );
+  void try_to_write_all( Writer& output );
+  bool write( uint64_t index, std::string data, Writer& output );
+
 public:
   /*
    * Insert a new substring to be reassembled into a ByteStream.
