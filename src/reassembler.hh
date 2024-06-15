@@ -16,7 +16,7 @@ private:
   void write_to_buffer( uint64_t index, std::string data, Writer& output );
   void try_to_write_all( Writer& output );
   void write( uint64_t index, std::string data, Writer& output );
-  std::string split_string(uint64_t index_start, uint64_t start, uint64_t end, std::string data );
+  std::string split_string(uint64_t index_start, uint64_t start, uint64_t end, const std::string& data );
 
 public:
   /*

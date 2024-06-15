@@ -6,7 +6,6 @@ using namespace std;
 
 void Reassembler::insert( uint64_t first_index, string data, bool is_last_substring, Writer& output )
 {
-  std::cout << "first_index: " << first_index << ", end_index: " << first_index + data.size() - 1 << '\n';
 
   if ( is_last_substring ) {
     if ( this->_next_index > 0 ) {
@@ -26,7 +25,6 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
     return;
   }
 
-  std::cout << "init next index: " << this->_next_index << '\n';
   auto first_index_end = first_index + data.size() - 1;
   if ( this->_next_index == first_index ) {
     // write
@@ -39,28 +37,14 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
 
     if ( this->_next_index > first_index_end ) {
       // drop
-    } else if (this->_next_index<= first_index_end) {
+    } else if ( this->_next_index <= first_index_end ) {
       // write party
       auto subStr = data.substr( this->_next_index - first_index, string::npos );
       this->write( this->_next_index, subStr, output );
     }
   }
 
-  for ( const auto& item : this->_buffer ) {
-    std::cout << "pre buffer start: " << item.first << " end:" << item.second.size() + item.first - 1 << '\n';
-  }
-  std::cout << "pre next index: " << this->_next_index << '\n';
   try_to_write_all( output );
-  std::cout << "after next index: " << this->_next_index << '\n';
-
-  for ( const auto& item : this->_buffer ) {
-    std::cout << "after buffer start: " << item.first << " end:" << item.second.size() + item.first - 1 << '\n';
-  }
-
-  (void)first_index;
-  (void)data;
-  (void)is_last_substring;
-  (void)output;
 }
 
 uint64_t Reassembler::bytes_pending() const
@@ -165,7 +149,7 @@ void Reassembler::write_to_buffer( uint64_t index, std::string data, Writer& out
       break;
     }
 
-    //[<>] [<]> []<>
+    //[<>] [<]>
     if ( new_data_start >= item_start && item_end >= new_data_start ) {
       if ( new_data_end <= item_end ) {
         is_inserted = true;
@@ -177,14 +161,15 @@ void Reassembler::write_to_buffer( uint64_t index, std::string data, Writer& out
 
     // <[>] <[]>
     if ( new_data_start < item_start ) {
+      new_buffer[new_data_start] = split_string( index, new_data_start, item_start - 1, data );
+    // <[]>
       if ( new_data_end > item_end ) {
-        new_buffer[new_data_start] = split_string( index, new_data_start, item_start - 1, data );
         new_data_start = item_end + 1;
         continue;
-      } else {
-        is_inserted = true;
-        break;
       }
+
+      is_inserted = true;
+      break;
     }
   }
 
@@ -199,7 +184,7 @@ void Reassembler::write_to_buffer( uint64_t index, std::string data, Writer& out
   this->_buffer.insert( new_buffer.begin(), new_buffer.end() );
 }
 
-std::string Reassembler::split_string( uint64_t index_start, uint64_t start, uint64_t end, std::string data )
+std::string Reassembler::split_string( uint64_t index_start, uint64_t start, uint64_t end, const std::string& data )
 {
   if ( start > end ) {
     return {};
